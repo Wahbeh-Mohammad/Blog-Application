@@ -1,3 +1,16 @@
+# To put in .env files
+
+## Front-end
+
+REACT_APP_API_URL = http://localhost:3001/api/v1
+
+## Back-end
+
+PORT = 3001
+MONGO_URI = mongo atlas connection string/ local mongo
+JWT_SECRET = your secret
+JWT_EXPIRETIME = 12h
+
 # Some todos.
 
 ## Front-End
