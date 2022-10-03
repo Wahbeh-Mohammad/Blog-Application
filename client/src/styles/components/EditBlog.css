@@ -1,0 +1,21 @@
+.edit-blog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.edit-blog-form-segment {
+    padding: 0.25rem 0rem;
+}
+
+.row-segment {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.edit-blog-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+}

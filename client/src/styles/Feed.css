@@ -1,0 +1,136 @@
+.feed {
+    height: calc(100vh - 100px);
+    display: grid;
+    grid-template-columns: 20% 55% 25%;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    overflow-y: scroll;
+    max-height: inherit;
+}
+
+.blog-list::-webkit-scrollbar,
+.saved-blogs::-webkit-scrollbar {
+    width: 10px;
+}
+
+.blog-list::-webkit-scrollbar-track,
+.saved-blogs::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.blog-list::-webkit-scrollbar-thumb,
+.saved-blogs::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.blog-list::-webkit-scrollbar-thumb:hover,
+.saved-blogs::-webkit-scrollbar-thumb:hover {
+    background: #646464;
+}
+
+.filter-item-hidden {
+    display: block;
+}
+
+.filter {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: right;
+    padding: 1rem;
+}
+
+.more-filter {
+    display: none !important;
+    transition-duration: 0.4s;
+}
+
+.rotated {
+    transform: rotate(180deg);
+    transition-duration: 0.4s;
+}
+
+.filter-top {
+    justify-content: space-between;
+}
+
+.filter-block-wrapper {
+    padding: 1rem 0rem;
+}
+
+.saved-blogs {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 100px);
+    overflow-y: scroll;
+    gap: 0.5rem;
+}
+
+.saved-blogs-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.no-save-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+}
+
+.no-save {
+    word-spacing: 200vw;
+}
+
+@media only screen and (max-width: 1280px) {
+    .feed {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .saved-blogs {
+        display: none;
+    }
+
+    .filter {
+        padding: 0.5rem 0rem;
+    }
+}
+
+@media only screen and (max-width: 980px) {
+    .saved-blogs {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .feed {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
+
+    .more-filter {
+        display: block !important;
+    }
+
+    .filter-select {
+        display: flex;
+        flex-direction: row !important;
+    }
+
+    .filter-item-hidden {
+        display: none !important;
+    }
+}

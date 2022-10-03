@@ -1,0 +1,31 @@
+.blog-wrapper {
+    min-width: 75%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.blog-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.blog-user-details,
+.blog-title-type {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: left;
+    align-items: center;
+}
+
+.blog-content {
+    padding: 1rem 0em;
+}
+
+.more-content {
+    padding-left: 5px;
+    cursor: pointer;
+}

@@ -1,0 +1,91 @@
+.header {
+    height: 100px;
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0rem 10rem;
+    transition: 0.2s;
+}
+
+.logo {
+    text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+}
+
+.theme-avatar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar {
+    cursor: pointer;
+}
+
+.links {
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.theme-burger {
+    display: none;
+}
+
+.burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.slice {
+    height: 5px;
+    width: 35px;
+}
+
+@media only screen and (max-width: 1280px) {
+    .header {
+        padding: 0rem 5rem;
+    }
+}
+
+@media only screen and (max-width: 760px) {
+    .header {
+        padding: 0rem 2.5rem;
+    }
+
+    .theme-avatar {
+        display: none;
+    }
+
+    .theme-burger {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header > .links,
+    .header > .avatar {
+        display: none;
+    }
+    .burger {
+        display: flex;
+    }
+
+    .res-links {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .res-links > .link {
+        padding: 1.5rem 2rem;
+    }
+}

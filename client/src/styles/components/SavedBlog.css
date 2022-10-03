@@ -1,0 +1,13 @@
+.saved-blog {
+    padding: 0.5rem;
+}
+
+.saved-blog-part {
+    padding: 0.5rem;
+}
+
+.saved-blog-header {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+}

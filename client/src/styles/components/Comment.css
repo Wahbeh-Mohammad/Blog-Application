@@ -1,0 +1,21 @@
+.comment-part {
+    padding: 0.5rem;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-header-part1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.edit-box {
+    padding: 0.25rem 0rem;
+}
