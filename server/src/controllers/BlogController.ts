@@ -22,6 +22,20 @@ const allBlogs = async (req: Request, res: Response) => {
     }
 };
 
+const userBlogs = async (req: Request, res: Response) => {
+    try {
+        const { userDetails } = req.body;
+        const blogList = await Blog.find({ createdBy: userDetails._id })
+            .populate("createdBy", ["_id", "name"])
+            .sort({ createdAt: "desc" })
+            .exec();
+        return res.json({ status: true, data: blogList });
+    } catch (err: any) {
+        Logger.error(CONTEXT, err.message, err);
+        return res.json({ error: err.message, status: false });
+    }
+};
+
 const specificBlog = async (req: Request, res: Response) => {
     try {
         const { _id } = req.params;
@@ -123,6 +137,7 @@ const deleteBlog = async (req: Request, res: Response) => {
 
 export default {
     allBlogs,
+    userBlogs,
     specificBlog,
     createBlog,
     updateBlog,

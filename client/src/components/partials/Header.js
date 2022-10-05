@@ -12,7 +12,6 @@ import "../../styles/partials/Header.css";
 const Header = (props) => {
     const { theme, setTheme } = props;
     const cookies = new Cookies();
-    const [userId, setUserId] = useState("");
     const [username, setUsername] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
 
@@ -47,7 +46,6 @@ const Header = (props) => {
                 if (status) {
                     setLoggedIn(true);
                     setUsername(cookies.get("name"));
-                    setUserId(cookies.get("id"));
                 } else {
                     setLoggedIn(false);
                     cookies.remove("id");
@@ -91,7 +89,7 @@ const Header = (props) => {
                             </Avatar>
                             <Menu onClose={handleClose} open={menuOpen} anchorEl={anchor}>
                                 <MenuItem>
-                                    <Link to={`/profile/${userId}`} className="link">
+                                    <Link to={`/profile`} className="link">
                                         <Typography className="icon-typography" color="text.default">
                                             <PersonIcon />
                                             Profile
@@ -160,7 +158,7 @@ const Header = (props) => {
                             </Typography>
                         </Link>
                         <Divider />
-                        <Link className={open ? "link" : "hidden"} to={`/profile/${userId}`} onClick={() => setOpen(false)}>
+                        <Link className={open ? "link" : "hidden"} to={`/profile`} onClick={() => setOpen(false)}>
                             <Typography variant="h6" color="text.default" sx={{ fontWeight: "bold" }}>
                                 Profile
                             </Typography>

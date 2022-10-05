@@ -13,6 +13,7 @@ export enum Gender {
 export interface UserInterface extends Document {
     username: string;
     password: string;
+    biography: string;
     name: string;
     birthdate: Date;
     gender: Gender;
@@ -47,6 +48,10 @@ const UserSchema: Schema = new Schema<UserInterface>(
             type: String,
             enum: Object.values(UserType),
             default: UserType.REGULAR,
+        },
+        biography: {
+            type: String,
+            default: "",
         },
     },
     { timestamps: true }

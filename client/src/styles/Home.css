@@ -8,8 +8,10 @@
 }
 
 .landing-text {
-    margin-left: 25%;
-    max-width: 75%;
+    max-width: 50vw;
+    padding: 2rem;
+    max-height: calc(100vh - 100px);
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17,8 +19,18 @@
     gap: 0.75rem;
 }
 
+.hero-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-height: calc(100vh - 100px);
+}
+
 .home-hero {
     transform: scale(70%);
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .link-box {
@@ -26,4 +38,25 @@
     flex-direction: row;
     justify-content: flex-end;
     gap: 1rem;
+}
+
+@media only screen and (max-width: 943px) {
+    .home {
+        display: grid;
+        grid-template-columns: 100%;
+        grid-template-rows: 50% 50%;
+        align-items: center;
+        margin: 0px auto;
+    }
+    .landing-text {
+        max-width: 80%;
+    }
+    .hero-container {
+        width: 100%;
+    }
+
+    .home-hero {
+        max-width: 80%;
+        max-height: 80%;
+    }
 }

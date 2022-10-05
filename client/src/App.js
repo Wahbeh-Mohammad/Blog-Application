@@ -20,7 +20,7 @@ const App = (props) => {
                         <Route exact path="/feed" element={<Feed />} />
                         <Route exact path="/blog/new" element={<CreateBlog />} />
                         <Route exact path="/blog/:id" element={<BlogPage />} />
-                        <Route exact path="/profile/:id" element={<Profile />} />
+                        <Route exact path="/profile" element={<Profile />} />
                     </Route>
                 </Routes>
             </Router>

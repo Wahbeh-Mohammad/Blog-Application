@@ -152,7 +152,7 @@ const Feed = (props) => {
                     </Box>
                 ) : (
                     savedBlogs.map((blog) => {
-                        return <SavedBlog userDetails={userDetails} blog={blog} />;
+                        return <SavedBlog key={blog._id} userDetails={userDetails} blog={blog} />;
                     })
                 )}
             </Box>

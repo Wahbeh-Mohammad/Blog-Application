@@ -134,7 +134,7 @@ const BlogPage = () => {
     useEffect(() => {
         if (!token) return window.location.assign("/");
 
-        fetch(`${process.env.REACT_APP_API_URL}/blog/${id}`, {
+        fetch(`${process.env.REACT_APP_API_URL}/blog/specific/${id}`, {
             method: "GET",
             headers: {
                 authorization: token,

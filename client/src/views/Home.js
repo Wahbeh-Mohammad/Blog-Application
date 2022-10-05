@@ -53,12 +53,14 @@ const Home = (props) => {
                                 <Button size="small" sx={{ fontWeight: "bold" }} variant="contained">
                                     Register
                                 </Button>
-                            </Link>{" "}
+                            </Link>
                         </>
                     )}
                 </Box>
             </Box>
-            <img src="./images/homeHero.svg" className="home-hero" alt="Blogging" />
+            <Box className="hero-container">
+                <img src="./images/homeHero.svg" className="home-hero" alt="Blogging" />
+            </Box>
         </Box>
     );
 };

@@ -4,6 +4,7 @@ import logger from "../config/Logger";
 import CredentialValidations from "../utils/ValidationUtils";
 import PasswordUtils from "../utils/PasswordUtils";
 import AuthUtils from "../utils/AuthUtils";
+import { isValidObjectId } from "mongoose";
 const { isValidName, isValidUsername, isValidPassword } = CredentialValidations;
 const CONTEXT = "USER-CONTROLLER";
 
@@ -93,7 +94,46 @@ const login = async (req: Request, res: Response) => {
     }
 };
 
+const userDetails = async (req: Request, res: Response) => {
+    try {
+        logger.info(CONTEXT, `${req.url} ${req.socket.remoteAddress}`);
+        const { userDetails } = req.body;
+        if (!isValidObjectId(userDetails._id))
+            return res.json({ status: false, error: "Invalid Object ID" });
+
+        const userFromDb = await User.findById({ _id: userDetails._id }).exec();
+
+        if (userFromDb === null) return res.json({ status: false, error: "User not found." });
+        else if (userFromDb) return res.json({ status: true, data: userFromDb });
+    } catch (err: any) {
+        logger.error(CONTEXT, err.message);
+        return res.json({ status: false, error: err.message });
+    }
+};
+
+const changeUserBiography = async (req: Request, res: Response) => {
+    try {
+        logger.info(CONTEXT, `${req.url} ${req.socket.remoteAddress}`);
+        const { userDetails, biography } = req.body;
+        if (!isValidObjectId(userDetails._id))
+            return res.json({ status: false, error: "Invalid Object ID" });
+
+        const userFromDb = await User.findById({ _id: userDetails._id }).exec();
+
+        if (userFromDb === null) return res.json({ status: false, error: "User not found." });
+
+        userFromDb.biography = biography;
+        await userFromDb.save();
+        return res.json({ status: true });
+    } catch (err: any) {
+        logger.error(CONTEXT, err.message);
+        return res.json({ status: false, error: err.message });
+    }
+};
+
 export default {
     register,
     login,
+    userDetails,
+    changeUserBiography,
 };

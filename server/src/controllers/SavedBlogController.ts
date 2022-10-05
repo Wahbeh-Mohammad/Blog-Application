@@ -5,6 +5,20 @@ import { isValidObjectId } from "mongoose";
 
 const CONTEXT = "CONTROLLER - SavedBlog";
 
+const fullSavedBlogsByUser = async (req: Request, res: Response) => {
+    try {
+        const { userDetails } = req.body;
+        const savedBlogs = await SavedBlog.find({ userId: userDetails._id })
+            .populate(["userId", "blogId"])
+            .exec();
+        if (savedBlogs.length !== 0) return res.json({ status: true, data: savedBlogs });
+        else return res.json({ status: false });
+    } catch (err: any) {
+        Logger.error(CONTEXT, err.message, err);
+        return res.json({ error: err.message, status: false });
+    }
+};
+
 const savedBlogsByUser = async (req: Request, res: Response) => {
     try {
         const { userDetails } = req.body;
@@ -71,6 +85,7 @@ const unsaveBlog = async (req: Request, res: Response) => {
 };
 
 export default {
+    fullSavedBlogsByUser,
     savedBlogsByUser,
     isSaved,
     saveBlog,
