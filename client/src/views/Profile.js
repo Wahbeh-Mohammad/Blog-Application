@@ -16,6 +16,7 @@ const Profile = (props) => {
     const [biographyError, setBiographyError] = useState(false);
 
     const handleChangeBiography = () => {
+        if (!biography) return setBiographyError(true);
         const cookies = new Cookies();
 
         fetch(`${process.env.REACT_APP_API_URL}/user/bio`, {

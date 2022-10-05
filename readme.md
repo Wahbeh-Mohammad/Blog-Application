@@ -21,7 +21,6 @@ JWT_EXPIRETIME = 12h
 - [ ] Create a Toast instead of Alert after Updating Biography in Profile Page.
 - [ ] Create a Toast after saving blogs instead of alert when something goes wrong.
 - [ ] Discover Page, Where you can find and follow people.
-- [ ] Profile Page where you can manage your data, see all saved blogs and your own blogs.
 
 ## Back-End
 
