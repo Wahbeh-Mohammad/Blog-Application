@@ -25,8 +25,7 @@ const savedBlogsByUser = async (req: Request, res: Response) => {
         const savedBlogs = await SavedBlog.find({ userId: userDetails._id })
             .populate("blogId", ["blogTitle", "_id"])
             .exec();
-        if (savedBlogs.length !== 0) return res.json({ status: true, data: savedBlogs });
-        else return res.json({ status: false });
+        return res.json({ status: true, data: savedBlogs });
     } catch (err: any) {
         Logger.error(CONTEXT, err.message, err);
         return res.json({ error: err.message, status: false });

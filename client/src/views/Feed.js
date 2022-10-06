@@ -1,77 +1,76 @@
-import React, { useEffect, useState } from "react";
-import { Box, TextField, Typography, FormControl, FormLabel, RadioGroup, Radio, FormControlLabel, Button, Paper } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import { Box, TextField, Typography, FormControl, FormLabel, RadioGroup, Radio, FormControlLabel, Paper } from "@mui/material";
 import Cookies from "universal-cookie";
-import { Blog, SavedBlog } from "../components";
+import { Blog, SavedBlog, Toast } from "../components";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import "../styles/Feed.css";
+import { fetchAllBlogs, fetchSavedBlogs } from "../requests";
 
 const Feed = (props) => {
-    const [userDetails, setUserDetails] = useState({});
-    const [blogs, setBlogs] = useState([]);
-    const [filterOpen, setFilterOpen] = useState(false);
+    const cookies = useMemo(() => new Cookies(), []);
+    const token = cookies.get("token");
 
-    const deleteBlog = (idx) => {
-        setBlogs((blogs) => blogs.filter((_, index) => index !== idx));
+    // Toast Controls
+    const [toastOpen, setToastOpen] = useState(false);
+    const [toastContent, setToastContent] = useState("");
+    const [toastSeverity, setToastSeverity] = useState("");
+
+    const handleToastClose = (event, reason) => {
+        if (reason === "clickaway") return;
+        setToastOpen(false);
+        setToastContent("");
+        setToastSeverity("");
     };
 
+    const [userDetails, setUserDetails] = useState({});
+    const [blogs, setBlogs] = useState([]);
+
+    const deleteBlog = (idx) => setBlogs((blogs) => blogs.filter((_, index) => index !== idx));
+
     // Filter related
+    const [filterOpen, setFilterOpen] = useState(false);
     const [filterTitle, setFilterTitle] = useState("");
     const [filterType, setFilterType] = useState("Any");
 
-    useEffect(() => {
-        try {
-            const cookies = new Cookies();
-            const token = cookies.get("token");
-            if (!token) return;
-            fetch(`${process.env.REACT_APP_API_URL}/blog/`, {
-                method: "GET",
-                headers: {
-                    authorization: token,
-                },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.status) {
-                        setBlogs(data.data);
-                        const token = cookies.get("token");
-                        const username = cookies.get("username");
-                        const name = cookies.get("name");
-                        const userId = cookies.get("id");
-                        setUserDetails({ username, name, userId, token });
-                    } else {
-                        console.log(data.error);
-                    }
-                });
-        } catch (err) {
-            console.log(err);
-        }
-    }, []);
-
     // Saved Blogs
     const [savedBlogs, setSavedBlogs] = useState([]);
-
-    const fetchSavedBlogs = () => {
-        const cookies = new Cookies();
-        const token = cookies.get("token");
-
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/user`, {
-            method: "GET",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) setSavedBlogs(data.data);
-                else setSavedBlogs(null);
-            });
-    };
+    const afterSaveUnsaveOperation = () =>
+        fetchSavedBlogs(token, (data) => {
+            if (data.data.length !== 0) setSavedBlogs(data.data);
+            else setSavedBlogs(null);
+        });
 
     useEffect(() => {
-        fetchSavedBlogs();
-    }, []);
+        if (!token) {
+            setToastContent("User not logged in.");
+            setToastSeverity("error");
+            setToastOpen(true);
+            return;
+        }
+
+        fetchAllBlogs(token, (data) => {
+            if (data.status) {
+                setBlogs(data.data);
+                setUserDetails({
+                    username: cookies.get("username"),
+                    name: cookies.get("name"),
+                    userId: cookies.get("id"),
+                    token: cookies.get("token"),
+                });
+            } else {
+                setToastContent(data.error);
+                setToastSeverity("error");
+                setToastOpen(true);
+            }
+        });
+
+        fetchSavedBlogs(token, (data) => {
+            if (data.data.length !== 0) setSavedBlogs(data.data);
+            else setSavedBlogs(null);
+        });
+    }, [token, cookies]);
 
     return (
         <Box className="feed">
@@ -131,7 +130,16 @@ const Feed = (props) => {
                 {blogs
                     .filter((blog) => blog.blogTitle.toLowerCase().includes(filterTitle) && (filterType === "Any" || blog.blogType === filterType))
                     .map((blog, idx) => {
-                        return <Blog key={blog._id} idx={idx} onDelete={deleteBlog} userDetails={userDetails} blog={blog} />;
+                        return (
+                            <Blog
+                                key={blog._id}
+                                idx={idx}
+                                onDelete={deleteBlog}
+                                afterSaveUnsaveOperation={afterSaveUnsaveOperation}
+                                userDetails={userDetails}
+                                blog={blog}
+                            />
+                        );
                     })}
             </Box>
             <Box className="saved-blogs">
@@ -140,9 +148,6 @@ const Feed = (props) => {
                         <BookmarkIcon />
                         Saved Blogs
                     </Typography>
-                    <Button onClick={fetchSavedBlogs} variant="contained" size="small" sx={{ fontWeight: "bold" }}>
-                        Reload
-                    </Button>
                 </Paper>
                 {savedBlogs === null ? (
                     <Box className="no-save-wrapper">
@@ -156,6 +161,7 @@ const Feed = (props) => {
                     })
                 )}
             </Box>
+            <Toast open={toastOpen} toastContent={toastContent} onClose={handleToastClose} severity={toastSeverity} />
         </Box>
     );
 };

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Avatar, Box, Paper, Divider, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
+import Toast from "./Toast";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TodayIcon from "@mui/icons-material/Today";
 import "../styles/components/Comment.css";
+import { fetchUpdateComment } from "../requests";
 
 const Comment = (props) => {
     const { userDetails, idx, onDelete } = props;
@@ -14,38 +15,31 @@ const Comment = (props) => {
     const [newComment, setNewComment] = useState("");
     const [newCommentError, setNewCommentError] = useState(false);
     const [open, setOpen] = useState(false);
-    const [requestInfo, setRequestInfo] = useState("");
-    const [info, setInfo] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const handleEditComment = () => {
         // reset errors
-        setInfo(false);
         setNewCommentError(false);
 
         if (!newComment.trim()) return setNewCommentError(true);
 
-        fetch(`${process.env.REACT_APP_API_URL}/comment/${comment._id}`, {
-            method: "PUT",
-            headers: {
-                authorization: userDetails.token,
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ commentContent: newComment }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setInfo(true);
-                    setComment((prev) => {
-                        return { ...prev, commentContent: newComment };
-                    });
-                } else {
-                    setInfo(true);
-                    setRequestInfo(data.error);
-                }
-            });
+        fetchUpdateComment(userDetails.token, comment._id, { commentContent: newComment.trim() }, (data) => {
+            if (data.status) {
+                setOpen(false);
+                setToastOpen(true);
+                setToastContent("Comment updated successfuly");
+                setToastSeverity("success");
+                setComment((prev) => {
+                    return { ...prev, commentContent: newComment.trim() };
+                });
+            } else {
+                setOpen(false);
+                setToastOpen(true);
+                setToastContent(data.error);
+                setToastSeverity("error");
+            }
+        });
     };
 
     const handleDeleteComment = () => {
@@ -60,9 +54,23 @@ const Comment = (props) => {
                 if (data.status) {
                     onDelete(idx);
                 } else {
-                    alert(data.error);
+                    setToastOpen(true);
+                    setToastSeverity("error");
+                    setToastContent(data.error);
                 }
             });
+    };
+
+    // Toast Controls
+    const [toastOpen, setToastOpen] = useState(false);
+    const [toastContent, setToastContent] = useState("");
+    const [toastSeverity, setToastSeverity] = useState("");
+
+    const handleToastClose = (event, reason) => {
+        if (reason === "clickaway") return;
+        setToastOpen(false);
+        setToastContent("");
+        setToastSeverity("");
     };
 
     return (
@@ -115,15 +123,7 @@ const Comment = (props) => {
                     </Box>
                 </DialogContent>
                 <Divider />
-                <DialogActions sx={{ justifyContent: "space-between", alignItems: "center" }}>
-                    <Box>
-                        {info && (
-                            <Typography className="icon-typography" variant="h6" color={requestInfo ? "error" : "green"}>
-                                <InfoIcon />
-                                {requestInfo ? requestInfo : "Comment Updated Successfuly"}
-                            </Typography>
-                        )}
-                    </Box>
+                <DialogActions sx={{ justifyContent: "flex-end", alignItems: "center" }}>
                     <Box sx={{ display: "flex", gap: ".5rem" }}>
                         <Button onClick={handleClose} variant="contained" color="error">
                             Cancel
@@ -134,6 +134,7 @@ const Comment = (props) => {
                     </Box>
                 </DialogActions>
             </Dialog>
+            <Toast open={toastOpen} onClose={handleToastClose} severity={toastSeverity} toastContent={toastContent} />
         </Paper>
     );
 };

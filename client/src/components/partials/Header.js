@@ -6,7 +6,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import verifyToken from "../../utils/VerifyToken";
+import { verifyTokenRequest } from "../../requests";
 import "../../styles/partials/Header.css";
 
 const Header = (props) => {
@@ -42,7 +42,7 @@ const Header = (props) => {
         const cookies = new Cookies();
         const token = cookies.get("token");
         if (token) {
-            verifyToken(token).then((status) => {
+            verifyTokenRequest(token).then((status) => {
                 if (status) {
                     setLoggedIn(true);
                     setUsername(cookies.get("name"));

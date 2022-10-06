@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Blog, { BlogType } from "../models/Blog";
+import SavedBlog from "../models/SavedBlog";
 import Comment from "../models/Comment";
 import Logger from "../config/Logger";
 import ValidationUtils from "../utils/ValidationUtils";
@@ -127,8 +128,10 @@ const deleteBlog = async (req: Request, res: Response) => {
         if (!isValidObjectId(_id)) return res.json({ status: false, error: "Invalid blog id." });
 
         const result = await Blog.deleteOne({ _id }).exec();
-        if (result.deletedCount === 1) return res.json({ status: true });
-        else return res.json({ status: false, error: "Couldn't delete blog, try again later" });
+        if (result.deletedCount === 1) {
+            await SavedBlog.deleteMany({ blogId: _id }).exec();
+            return res.json({ status: true });
+        } else return res.json({ status: false, error: "Couldn't delete blog, try again later" });
     } catch (err: any) {
         Logger.error(CONTEXT, err.message, err);
         return res.json({ error: err.message, status: false });

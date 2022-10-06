@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { Divider, Button, Avatar, Box, Typography, Snackbar, Alert, TextField, Paper } from "@mui/material";
-import { BlogTypeLabel, EditBlog, Comment } from "../components";
+import { Divider, Button, Avatar, Box, Typography, TextField, Paper } from "@mui/material";
+import { BlogTypeLabel, EditBlog, Comment, Toast } from "../components";
 import CommentIcon from "@mui/icons-material/Comment";
 import InfoIcon from "@mui/icons-material/Info";
 import TodayIcon from "@mui/icons-material/Today";
@@ -11,145 +11,99 @@ import EditIcon from "@mui/icons-material/Edit";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import "../styles/FullBlog.css";
+import { fetchCreateComment, fetchDeleteBlog, fetchSaveBlog, fetchSaveCheck, fetchSpecificBlog, fetchUnsaveBlog } from "../requests";
 
 const BlogPage = () => {
     const cookies = new Cookies();
+    const userId = cookies.get("id");
+    const token = cookies.get("token");
+
     const { id } = useParams();
-    const [userId] = useState(cookies.get("id"));
-    const [token] = useState(cookies.get("token"));
     const [blog, setBlog] = useState(null);
     const [comments, setComments] = useState([]);
     const [blogEditDetails, setBlogEditDetails] = useState({});
-    const [error, setError] = useState("");
 
-    // Edit Controls
+    // Edit & Update Controls
     const [editOpen, setEditOpen] = useState(false);
-    const handleEditOpen = () => {
-        setEditOpen(true);
-    };
+    const handleEditOpen = () => setEditOpen(true);
     const handleEditClose = () => setEditOpen(false);
+
     const onSuccessfulUpdate = (updatedDetails) => {
         setBlog({ ...blog, blogTitle: updatedDetails.blogTitle, blogContent: updatedDetails.blogContent, blogType: updatedDetails.blogType });
     };
 
     // Toast Controls
     const [toastOpen, setToastOpen] = useState(false);
-    const [toastValue, setToastValue] = useState("");
+    const [toastContent, setToastContent] = useState("");
+    const [toastSeverity, setToastSeverity] = useState("");
 
     const handleToastClose = (event, reason) => {
         if (reason === "clickaway") return;
         setToastOpen(false);
+        setToastContent("");
+        setToastSeverity("");
     };
 
     // Delete Controls
     const handleDeleteBlog = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/blog/${id}`, {
-            method: "DELETE",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setToastOpen(true);
-                    setTimeout(() => window.location.assign("/feed"), 2000);
-                } else {
-                    setToastOpen(true);
-                    setToastValue(data.error);
-                }
-            });
+        fetchDeleteBlog(token, id, (data) => {
+            if (data.status) {
+                setToastContent("Blog has been deleted");
+                setToastSeverity("success");
+                setToastOpen(true);
+                setTimeout(() => window.location.assign("/feed"), 2000);
+            } else {
+                setToastContent(data.error);
+                setToastSeverity("error");
+                setToastOpen(true);
+            }
+        });
     };
 
     // Save Controls
     const [isSaved, setIsSaved] = useState(false);
-    const handleSaveBlog = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/${blog._id}`, {
-            method: "POST",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setIsSaved(data.status);
-            });
-    };
-
-    const handleUnsaveBlog = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/${blog._id}`, {
-            method: "DELETE",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setIsSaved(!data.status);
-            });
-    };
-
-    useEffect(() => {
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/${id}`, {
-            method: "GET",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => setIsSaved(data.status));
-    }, [token, id]);
+    const handleSaveBlog = () => fetchSaveBlog(token, id, (data) => setIsSaved(data.status));
+    const handleUnsaveBlog = () => fetchUnsaveBlog(token, id, (data) => setIsSaved(!data.status));
 
     // Comment Controls
     const [newComment, setNewComment] = useState("");
     const [newCommentError, setNewCommentError] = useState(false);
 
-    const onSuccessfulCommentDelete = (idx) => {
-        setComments((comments) => comments.filter((_, index) => index !== idx));
+    const handleCreateComment = () => {
+        setNewCommentError(false);
+        if (!newComment.trim()) return setNewCommentError(true);
+
+        fetchCreateComment(token, { blogId: id, commentContent: newComment.trim() }, (data) => {
+            if (data.status) {
+                setComments([...comments, data.data]);
+                setNewComment("");
+            } else {
+                setToastContent(data.error);
+                setToastSeverity("error");
+            }
+        });
     };
 
-    const handleCreateComment = () => {
-        if (!newComment) return setNewCommentError(true);
-
-        fetch(`${process.env.REACT_APP_API_URL}/comment/new`, {
-            method: "POST",
-            headers: {
-                authorization: token,
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ blogId: id, commentContent: newComment }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                console.log(data);
-                if (data.status) {
-                    setComments([...comments, data.data]);
-                    setNewComment("");
-                } else {
-                    setToastValue(data.error);
-                }
-            });
+    const onSuccessfulCommentDelete = (idx) => {
+        setComments((comments) => comments.filter((_, index) => index !== idx));
     };
 
     useEffect(() => {
         if (!token) return window.location.assign("/");
 
-        fetch(`${process.env.REACT_APP_API_URL}/blog/specific/${id}`, {
-            method: "GET",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setBlog(data.data);
-                    setBlogEditDetails(data.data);
-                    setComments(data.comments);
-                } else {
-                    setError(data.error);
-                }
-            });
+        fetchSpecificBlog(token, id, (data) => {
+            if (data.status) {
+                setBlog(data.data);
+                setBlogEditDetails(data.data);
+                setComments(data.comments);
+            } else {
+                setToastOpen(true);
+                setToastContent(data.error);
+                setToastSeverity("error");
+            }
+        });
+
+        fetchSaveCheck(token, id, (data) => setIsSaved(data.status));
     }, [id, token]);
 
     return (
@@ -249,21 +203,9 @@ const BlogPage = () => {
                                 })}
                         </Box>
                     </Box>
-                    <Snackbar open={toastOpen} autoHideDuration={2500} onClose={handleToastClose}>
-                        <Alert onClose={handleToastClose} variant="filled" severity={toastValue !== "" ? "error" : "success"} sx={{ width: "100%" }}>
-                            {toastValue !== "" ? toastValue : "Blog deleted successfully"}
-                        </Alert>
-                    </Snackbar>
                 </>
             )}
-            {error && (
-                <Box className="error-box">
-                    <Typography variant="h4" color="error" className="icon-typography">
-                        <InfoIcon fontSize="large" />
-                        {error}
-                    </Typography>
-                </Box>
-            )}
+            <Toast open={toastOpen} onClose={handleToastClose} toastContent={toastContent} severity={toastSeverity} />
         </Box>
     );
 };

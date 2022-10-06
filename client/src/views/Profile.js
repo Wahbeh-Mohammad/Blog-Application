@@ -1,102 +1,97 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Cookies from "universal-cookie";
-import { Blog } from "../components";
+import { Blog, Toast } from "../components";
 import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import "../styles/Profile.css";
+import { fetchFullSavedBlogs, fetchUserBlogs, fetchUserDetails } from "../requests";
+import fetchUpdateUserBio from "../requests/user/FetchUpdateUserBio";
 
 const Profile = (props) => {
-    // View controls
-    const [currentView, setCurrentView] = useState("details");
+    const cookies = useMemo(() => new Cookies(), []);
+    const token = cookies.get("token");
 
     // Profile Data related
     const [profileData, setProfileData] = useState(null);
-    const [error, setError] = useState("");
-
     const [biography, setBiography] = useState("");
     const [biographyError, setBiographyError] = useState(false);
 
     const handleChangeBiography = () => {
-        if (!biography) return setBiographyError(true);
-        const cookies = new Cookies();
+        setBiographyError(false);
+        if (!biography.trim()) return setBiographyError(true);
 
-        fetch(`${process.env.REACT_APP_API_URL}/user/bio`, {
-            method: "POST",
-            headers: {
-                authorization: cookies.get("token"),
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ biography }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    alert("Biography Updated successfuly");
-                } else {
-                    alert(data.error);
-                }
-            });
+        fetchUpdateUserBio(token, { biography: biography.trim() }, (data) => {
+            setToastOpen(true);
+            if (data.status) {
+                setToastContent("Biography updated successfuly");
+                setToastSeverity("success");
+            } else {
+                setToastContent(data.error);
+                setToastSeverity("error");
+            }
+        });
     };
 
     // blogs related
     const [blogs, setBlogs] = useState(null);
-    const deleteBlog = (idx) => {
-        setBlogs((blogs) => blogs.filter((_, index) => index !== idx));
-    };
-
-    // Saved blogs related
+    const deleteBlog = (idx) => setBlogs((blogs) => blogs.filter((_, index) => index !== idx));
     const [savedBlogs, setSavedBlogs] = useState(null);
+    const afterSaveUnsaveOperation = () =>
+        fetchFullSavedBlogs(token, (data) => {
+            if (data.status) setSavedBlogs(data.data);
+            else setSavedBlogs(null);
+        });
+
+    // View controls
+    const [currentView, setCurrentView] = useState("details");
 
     useEffect(() => {
-        const cookies = new Cookies();
-        const token = cookies.get("token");
+        if (!token) {
+            setToastContent("User is not logged in");
+            setToastSeverity("error");
+            setToastOpen(true);
+            return;
+        }
 
-        if (!token) return setError("User not logged in.");
+        fetchUserDetails(token, ({ status, data, error }) => {
+            if (status) {
+                data.token = token;
+                data.userId = cookies.get("id");
+                setProfileData(data);
+                setBiography(data.biography);
+            } else {
+                setToastOpen(true);
+                setToastContent(error);
+                setToastSeverity("error");
+            }
+        });
 
-        fetch(`${process.env.REACT_APP_API_URL}/user/`, {
-            method: "GET",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then(({ status, data, error }) => {
-                if (status) {
-                    data.token = token;
-                    data.userId = cookies.get("id");
-                    setProfileData(data);
-                } else {
-                    setError(error);
-                }
-            });
+        fetchUserBlogs(token, ({ status, data, error }) => {
+            if (status) {
+                setBlogs(data);
+            } else {
+                setToastOpen(true);
+                setToastContent(error);
+                setToastSeverity("error");
+            }
+        });
 
-        fetch(`${process.env.REACT_APP_API_URL}/blog/user/`, {
-            method: "GET",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then(({ status, data, error }) => {
-                if (status) {
-                    setBlogs(data);
-                } else {
-                    alert(error);
-                }
-            });
+        fetchFullSavedBlogs(token, (data) => {
+            if (data.status) setSavedBlogs(data.data);
+            else setSavedBlogs(null);
+        });
+    }, [token, cookies]);
 
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/user/full`, {
-            method: "GET",
-            headers: {
-                authorization: token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                console.log(data.data);
-                if (data.status) setSavedBlogs(data.data);
-                else setSavedBlogs(null);
-            });
-    }, []);
+    // Toast Controls
+    const [toastOpen, setToastOpen] = useState(false);
+    const [toastSeverity, setToastSeverity] = useState("");
+    const [toastContent, setToastContent] = useState("");
+
+    const handleToastClose = (event, reason) => {
+        if (reason === "clickaway") return;
+        setToastOpen(false);
+        setToastSeverity("");
+        setToastContent("");
+    };
 
     return (
         <Box className="profile-wrapper">
@@ -149,36 +144,22 @@ const Profile = (props) => {
                         {currentView === "details" && (
                             <Box className="profile-details">
                                 <Box className="profile-details-left">
-                                    <Box className="profile-details-segment">
-                                        <Typography variant="h6" color="text.default">
-                                            Real name
-                                        </Typography>
-                                        <TextField variant="outlined" value={profileData.name} color="primary" disabled />
-                                    </Box>
-                                    <Box className="profile-details-segment">
-                                        <Typography variant="h6" color="text.default">
-                                            Username
-                                        </Typography>
-                                        <TextField variant="outlined" value={profileData.username} color="primary" disabled />
-                                    </Box>
-                                    <Box className="profile-details-segment">
-                                        <Typography variant="h6" color="text.default">
-                                            Password
-                                        </Typography>
-                                        <TextField variant="outlined" value={profileData.password} type="password" color="primary" disabled />
-                                    </Box>
-                                    <Box className="profile-details-segment">
-                                        <Typography variant="h6" color="text.default">
-                                            Gender
-                                        </Typography>
-                                        <TextField variant="outlined" value={profileData.gender} type="text" color="primary" disabled />
-                                    </Box>
-                                    <Box className="profile-details-segment">
-                                        <Typography variant="h6" color="text.default">
-                                            Birthdate
-                                        </Typography>
-                                        <TextField variant="outlined" value={profileData.birthdate} type="text" color="primary" disabled />
-                                    </Box>
+                                    {[
+                                        ["Real name", "text", profileData.name],
+                                        ["Username", "text", profileData.username],
+                                        ["Password", "password", profileData.password],
+                                        ["Gender", "text", profileData.gender],
+                                        ["Birthdate", "date", profileData.birthdate],
+                                    ].map((value) => {
+                                        return (
+                                            <Box key={value[0]} className="profile-details-segment">
+                                                <Typography variant="h6" color="text.default">
+                                                    {value[0]}
+                                                </Typography>
+                                                <TextField variant="outlined" value={value[2]} type={value[1]} color="primary" disabled />
+                                            </Box>
+                                        );
+                                    })}
                                 </Box>
                                 <Box className="profile-details-right">
                                     <Typography variant="h6" color="text.default">
@@ -202,29 +183,45 @@ const Profile = (props) => {
                         )}
                         {currentView === "blogs" && (
                             <Box className="blog-list">
-                                {blogs.map((blog, idx) => {
-                                    return <Blog key={blog._id} idx={idx} onDelete={deleteBlog} userDetails={profileData} blog={blog} />;
-                                })}
+                                {blogs !== null &&
+                                    blogs.map((blog, idx) => {
+                                        return (
+                                            <Blog
+                                                afterSaveUnsaveOperation={afterSaveUnsaveOperation}
+                                                key={blog._id}
+                                                idx={idx}
+                                                onDelete={deleteBlog}
+                                                userDetails={profileData}
+                                                blog={blog}
+                                            />
+                                        );
+                                    })}
                             </Box>
                         )}
                         {currentView === "saved-blogs" && (
                             <Box className="blog-list">
-                                {savedBlogs.map((savedBlog, idx) => {
-                                    const { blogId, userId } = savedBlog;
-                                    const blog = blogId;
-                                    blog.createdBy = userId;
-                                    return <Blog key={blog._id} idx={idx} onDelete={deleteBlog} userDetails={profileData} blog={blog} />;
-                                })}
+                                {savedBlogs !== null &&
+                                    savedBlogs.map((savedBlog, idx) => {
+                                        const { blogId, userId } = savedBlog;
+                                        const blog = blogId;
+                                        blog.createdBy = userId;
+                                        return (
+                                            <Blog
+                                                afterSaveUnsaveOperation={afterSaveUnsaveOperation}
+                                                key={blog._id}
+                                                idx={idx}
+                                                onDelete={deleteBlog}
+                                                userDetails={profileData}
+                                                blog={blog}
+                                            />
+                                        );
+                                    })}
                             </Box>
                         )}
                     </Box>
                 </Box>
             )}
-            {profileData === false && error && (
-                <Box className="error-box">
-                    <Typography variant="h6">{error}</Typography>
-                </Box>
-            )}
+            <Toast open={toastOpen} onClose={handleToastClose} severity={toastSeverity} toastContent={toastContent} />
         </Box>
     );
 };

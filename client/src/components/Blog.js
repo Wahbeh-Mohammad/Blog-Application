@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Alert, Snackbar, Box, Typography, Avatar, Paper, Button, Divider, Menu, MenuItem } from "@mui/material";
-import { BlogTypeLabel, EditBlog } from "../components";
+import { Box, Typography, Avatar, Paper, Button, Divider, Menu, MenuItem } from "@mui/material";
+import { BlogTypeLabel, EditBlog, Toast } from "../components";
 import TodayIcon from "@mui/icons-material/Today";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -9,9 +9,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import "../styles/components/Blog.css";
+import { fetchDeleteBlog, fetchSaveBlog, fetchSaveCheck, fetchUnsaveBlog } from "../requests";
 
 const Blog = (props) => {
-    const { userDetails, blog, idx, onDelete } = props;
+    const { userDetails, blog, idx, onDelete, afterSaveUnsaveOperation } = props;
     const [blogTitle, setBlogTitle] = useState(blog.blogTitle);
     const [blogType, setBlogType] = useState(blog.blogType);
     const [blogContent, setBlogContent] = useState(blog.blogContent);
@@ -34,51 +35,35 @@ const Blog = (props) => {
     // Save Controls
     const [isSaved, setIsSaved] = useState(false);
     const handleSaveBlog = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/${blog._id}`, {
-            method: "POST",
-            headers: {
-                authorization: userDetails.token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setAnchor(null);
-                setIsSaved(data.status);
-            });
+        fetchSaveBlog(userDetails.token, blog._id, (data) => {
+            setAnchor(null);
+            if (data.status) afterSaveUnsaveOperation();
+            setIsSaved(data.status);
+        });
     };
 
     const handleUnsaveBlog = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/${blog._id}`, {
-            method: "DELETE",
-            headers: {
-                authorization: userDetails.token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setAnchor(null);
-                setIsSaved(!data.status);
-            });
+        fetchUnsaveBlog(userDetails.token, blog._id, (data) => {
+            setAnchor(null);
+            if (data.status) afterSaveUnsaveOperation();
+            setIsSaved(!data.status);
+        });
     };
 
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_API_URL}/savedBlog/${blog._id}`, {
-            method: "GET",
-            headers: {
-                authorization: userDetails.token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => setIsSaved(data.status));
+        fetchSaveCheck(userDetails.token, blog._id, (data) => setIsSaved(data.status));
     }, [userDetails, blog]);
 
     // Toast Controls
     const [toastOpen, setToastOpen] = useState(false);
-    const [deleteError, setDeleteError] = useState("");
+    const [toastContent, setToastContent] = useState("");
+    const [toastSeverity, setToastSeverity] = useState("");
 
     const handleToastClose = (event, reason) => {
         if (reason === "clickaway") return;
         setToastOpen(false);
+        setToastContent("");
+        setToastSeverity("");
     };
 
     // Menu Controls
@@ -88,21 +73,15 @@ const Blog = (props) => {
     const handleClose = () => setAnchor(null);
 
     const handleDeleteBlog = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/blog/${blog._id}`, {
-            method: "DELETE",
-            headers: {
-                authorization: userDetails.token,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    onDelete(idx);
-                } else {
-                    setToastOpen(true);
-                    setDeleteError(data.error);
-                }
-            });
+        fetchDeleteBlog(userDetails.token, blog._id, (data) => {
+            if (data.status) {
+                onDelete(idx);
+            } else {
+                setToastOpen(true);
+                setToastContent(data.error);
+                setToastSeverity("error");
+            }
+        });
     };
 
     return (
@@ -194,11 +173,7 @@ const Blog = (props) => {
                     </Button>
                 </Link>
             </Box>
-            <Snackbar open={toastOpen} autoHideDuration={2500} onClose={handleToastClose}>
-                <Alert onClose={handleToastClose} variant="filled" severity={deleteError !== "" ? "error" : "success"} sx={{ width: "100%" }}>
-                    {deleteError !== "" ? deleteError : "Blog deleted successfully, Reloading"}
-                </Alert>
-            </Snackbar>
+            <Toast open={toastOpen} onClose={handleToastClose} severity={toastSeverity} toastContent={toastContent} />
             <EditBlog blog={blog} open={editOpen} onClose={handleEditClose} userDetails={userDetails} onSuccessfulUpdate={onSuccessfulUpdate} />
         </Paper>
     );

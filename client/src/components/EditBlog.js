@@ -16,10 +16,10 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import "../styles/components/EditBlog.css";
+import { fetchUpdateBlogDetails } from "../requests";
 
 const EditBlog = (props) => {
     const { open, onClose, blog, userDetails, onSuccessfulUpdate } = props;
-    const [_id] = useState(blog._id);
     const [blogTitle, setBlogTitle] = useState(blog.blogTitle);
     const [blogTitleError, setBlogTitleError] = useState(false);
     const [blogType, setBlogType] = useState(blog.blogType);
@@ -42,28 +42,20 @@ const EditBlog = (props) => {
         if (!blogTitle) return setBlogTitleError(true);
         if (!blogType) return setBlogTypeError(true);
         if (!blogContent) return setBlogContentError(true);
-        fetch(`${process.env.REACT_APP_API_URL}/blog/${_id}`, {
-            method: "PUT",
-            headers: {
-                authorization: userDetails.token,
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ blogTitle, blogType, blogContent }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setVisible(true);
-                    onSuccessfulUpdate({ blogTitle, blogContent, blogType });
-                    setTimeout(() => {
-                        setRequestError("");
-                        onClose();
-                    }, 750);
-                } else {
-                    setRequestError(data.error);
-                    setVisible(true);
-                }
-            });
+
+        fetchUpdateBlogDetails(userDetails.token, blog._id, { blogTitle, blogType, blogContent }, (data) => {
+            if (data.status) {
+                setVisible(true);
+                onSuccessfulUpdate({ blogTitle, blogContent, blogType });
+                setTimeout(() => {
+                    setRequestError("");
+                    onClose();
+                }, 750);
+            } else {
+                setRequestError(data.error);
+                setVisible(true);
+            }
+        });
     };
 
     return (

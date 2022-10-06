@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Typography, TextField, Button, Paper, Divider, FormControlLabel, FormControl, Radio, RadioGroup, FormLabel } from "@mui/material";
 import Cookies from "universal-cookie";
-import verifyToken from "../utils/VerifyToken";
+import { verifyTokenRequest, registerRequest } from "../requests";
 import HomeIcon from "@mui/icons-material/Home";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
@@ -54,35 +54,26 @@ const Register = (props) => {
         if (!birthdate) return setBirthdateError(true);
         if (!realName) return setRealNameError(true);
 
-        fetch(`${process.env.REACT_APP_API_URL}/user/register`, {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ username, password, birthdate, gender, name: realName }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.status) {
-                    cookies.set("username", data.username);
-                    cookies.set("id", data.id);
-                    cookies.set("token", data.token);
-                    cookies.set("name", data.name);
-                    window.location.assign("/");
-                } else {
-                    setFormError(data.error);
-                }
-            });
+        registerRequest({ username, password, birthdate, gender, name: realName }, (data) => {
+            if (data.status) {
+                cookies.set("username", data.username);
+                cookies.set("id", data.id);
+                cookies.set("token", data.token);
+                cookies.set("name", data.name);
+                window.location.assign("/");
+            } else {
+                setFormError(data.error);
+            }
+        });
     };
 
     useEffect(() => {
         const cookies = new Cookies();
         const token = cookies.get("token");
         if (token) {
-            verifyToken(token).then((status) => {
-                if (status) {
-                    window.location.assign("/");
-                } else {
+            verifyTokenRequest(token).then((status) => {
+                if (status) window.location.assign("/");
+                else {
                     cookies.remove("id");
                     cookies.remove("username");
                     cookies.remove("token");

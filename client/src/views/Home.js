@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Box, Typography } from "@mui/material";
 import "../styles/Home.css";
 import Cookies from "universal-cookie";
-import verifyToken from "../utils/VerifyToken";
+import { verifyTokenRequest } from "../requests";
 
 const Home = (props) => {
     const [loggedIn, setLoggedIn] = useState(false);
@@ -12,7 +12,7 @@ const Home = (props) => {
         const cookies = new Cookies();
         const token = cookies.get("token");
         if (token) {
-            verifyToken(token).then((status) => {
+            verifyTokenRequest(token).then((status) => {
                 if (status) {
                     setLoggedIn(true);
                 } else {

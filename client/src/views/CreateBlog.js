@@ -1,31 +1,27 @@
 import React, { useState } from "react";
-import { Box, Divider, FormControl, MenuItem, Select, TextField, Typography, Button, Paper, Snackbar, Alert } from "@mui/material";
+import Cookies from "universal-cookie";
+import { Box, Divider, FormControl, MenuItem, Select, TextField, Typography, Button, Paper } from "@mui/material";
+import { Toast } from "../components";
 import InfoIcon from "@mui/icons-material/Info";
 import "../styles/CreateBlog.css";
-import Cookies from "universal-cookie";
+import { fetchCreateBlog } from "../requests";
 
 const CreateBlog = (props) => {
-    const [userToken] = useState(new Cookies().get("token"));
+    const cookies = new Cookies();
+    const token = cookies.get("token");
+
+    // New blog details and related stuff
     const [blogTitle, setBlogTitle] = useState("");
     const [blogTitleError, setBlogTitleError] = useState(false);
     const [blogType, setBlogType] = useState("Misc");
     const [blogTypeError, setBlogTypeError] = useState(false);
     const [blogContent, setBlogContent] = useState("");
     const [blogContentError, setBlogContentError] = useState(false);
-    const [formError, setFormError] = useState("");
-
-    const [open, setOpen] = useState(false);
-
-    const handleClose = (event, reason) => {
-        if (reason === "clickaway") return;
-
-        setOpen(false);
-    };
 
     const resetErrors = () => {
         setBlogTitleError(false);
         setBlogTypeError(false);
-        setFormError("");
+        setBlogContentError(false);
     };
 
     const handleSubmit = () => {
@@ -34,26 +30,30 @@ const CreateBlog = (props) => {
         if (!blogType) return setBlogTypeError(true);
         if (!blogContent) return setBlogContentError(true);
 
-        fetch(`${process.env.REACT_APP_API_URL}/blog/new`, {
-            method: "POST",
-            headers: {
-                authorization: userToken,
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ blogTitle, blogContent: blogContent.trim(), blogType }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setOpen(true);
-                    setTimeout(() => {
-                        window.location.assign("/feed");
-                    }, 1250);
-                } else {
-                    setOpen(true);
-                    setFormError(data.error);
-                }
-            });
+        fetchCreateBlog({ blogTitle, blogContent: blogContent.trim(), blogType }, token, (data) => {
+            if (data.status) {
+                setToastContent("New blog created!, redirecting to feed.");
+                setToastSeverity("success");
+                setToastOpen(true);
+                setTimeout(() => window.location.assign("/feed"), 1250);
+            } else {
+                setToastContent(data.error);
+                setToastSeverity("error");
+                setToastOpen(true);
+            }
+        });
+    };
+
+    // Toast Controls
+    const [toastOpen, setToastOpen] = useState(false);
+    const [toastSeverity, setToastSeverity] = useState("");
+    const [toastContent, setToastContent] = useState("");
+
+    const handleToastClose = (event, reason) => {
+        if (reason === "clickaway") return;
+        setToastOpen(false);
+        setToastSeverity("");
+        setToastContent("");
     };
 
     return (
@@ -91,10 +91,13 @@ const CreateBlog = (props) => {
                             onChange={(e) => setBlogType(e.target.value)}
                             value={blogType}
                         >
-                            <MenuItem value="Misc">Misc</MenuItem>
-                            <MenuItem value="Devlog">Devlog</MenuItem>
-                            <MenuItem value="Learning">Learning</MenuItem>
-                            <MenuItem value="Topics">Topics</MenuItem>
+                            {["Misc", "Devlog", "Learning", "Topics"].map((value) => {
+                                return (
+                                    <MenuItem key={value} value={value}>
+                                        {value}
+                                    </MenuItem>
+                                );
+                            })}
                         </Select>
                     </FormControl>
                 </Box>
@@ -117,11 +120,7 @@ const CreateBlog = (props) => {
                         Create new Blog
                     </Button>
                 </Box>
-                <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
-                    <Alert onClose={handleClose} variant="filled" severity={formError !== "" ? "error" : "success"} sx={{ width: "100%" }}>
-                        {formError !== "" ? formError : "New blog created Successfully, Redirecting"}
-                    </Alert>
-                </Snackbar>
+                <Toast open={toastOpen} onClose={handleToastClose} severity={toastSeverity} toastContent={toastContent} />
             </Paper>
         </Box>
     );

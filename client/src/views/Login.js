@@ -4,7 +4,7 @@ import Cookies from "universal-cookie";
 import HomeIcon from "@mui/icons-material/Home";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import verifyToken from "../utils/VerifyToken";
+import { verifyTokenRequest, loginRequest } from "../requests";
 import { Box, Button, Paper, Typography, Divider, TextField } from "@mui/material";
 import "../styles/Forms.css";
 
@@ -28,36 +28,26 @@ const Login = (props) => {
         if (!username) return setUsernameError(true);
         if (!password) return setPasswordError(true);
 
-        fetch(`${process.env.REACT_APP_API_URL}/user/login`, {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ username, password }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    console.log(data.data);
-                    cookies.set("username", data.username);
-                    cookies.set("id", data.id);
-                    cookies.set("token", data.token);
-                    cookies.set("name", data.name);
-                    window.location.assign("/");
-                } else {
-                    setFormError(data.error);
-                }
-            });
+        loginRequest({ username, password }, (data) => {
+            if (data.status) {
+                cookies.set("username", data.username);
+                cookies.set("id", data.id);
+                cookies.set("token", data.token);
+                cookies.set("name", data.name);
+                window.location.assign("/");
+            } else {
+                setFormError(data.error);
+            }
+        });
     };
 
     useEffect(() => {
         const cookies = new Cookies();
         const token = cookies.get("token");
         if (token) {
-            verifyToken(token).then((status) => {
-                if (status) {
-                    window.location.assign("/");
-                } else {
+            verifyTokenRequest(token).then((status) => {
+                if (status) window.location.assign("/");
+                else {
                     cookies.remove("id");
                     cookies.remove("username");
                     cookies.remove("token");
