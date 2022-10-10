@@ -6,7 +6,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import { verifyTokenRequest } from "../../requests";
+import { verifyTokenRequest } from "../../utils/requests";
 import "../../styles/partials/Header.css";
 
 const Header = (props) => {

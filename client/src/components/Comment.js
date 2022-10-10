@@ -5,14 +5,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TodayIcon from "@mui/icons-material/Today";
 import "../styles/components/Comment.css";
-import { fetchUpdateComment } from "../requests";
+import { fetchUpdateComment } from "../utils/requests";
+import LinkifiedText from "./LinkifiedText";
 
 const Comment = (props) => {
     const { userDetails, idx, onDelete } = props;
 
     const [comment, setComment] = useState(props.comment);
     // Dialog && Edit Comment controls
-    const [newComment, setNewComment] = useState("");
+    const [newComment, setNewComment] = useState(props.comment.commentContent);
     const [newCommentError, setNewCommentError] = useState(false);
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
@@ -98,7 +99,7 @@ const Comment = (props) => {
             <Divider />
             <Box className="comment-part">
                 <Typography sx={{ whiteSpace: "pre-line" }} variant="subtitle1">
-                    {comment.commentContent}
+                    <LinkifiedText>{comment.commentContent}</LinkifiedText>
                 </Typography>
             </Box>
             <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>

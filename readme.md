@@ -16,7 +16,13 @@ JWT_EXPIRETIME = 12h
 ## Front-End
 
 - [ ] Discover Page, Where you can find and follow people.
+- [ ] Add an about author in specific blog page on the left side.
 
 ## Back-End
 
+- [ ] Cascade after deleting requests, this is not sql :(
 - [ ] Consider Adding Upvotes/Downvotes for Blogs, think of a way to add them/ do some research.
+
+## Ideas
+
+- Add a grouping mechanism like threads so you can group blogs that are related together .

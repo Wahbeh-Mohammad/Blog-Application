@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { Divider, Button, Avatar, Box, Typography, TextField, Paper } from "@mui/material";
-import { BlogTypeLabel, EditBlog, Comment, Toast } from "../components";
+import { BlogTypeLabel, EditBlog, Comment, Toast, LinkifiedText } from "../components";
 import CommentIcon from "@mui/icons-material/Comment";
 import InfoIcon from "@mui/icons-material/Info";
 import TodayIcon from "@mui/icons-material/Today";
@@ -10,8 +10,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
+import { fetchCreateComment, fetchDeleteBlog, fetchSaveBlog, fetchSaveCheck, fetchSpecificBlog, fetchUnsaveBlog } from "../utils/requests";
 import "../styles/FullBlog.css";
-import { fetchCreateComment, fetchDeleteBlog, fetchSaveBlog, fetchSaveCheck, fetchSpecificBlog, fetchUnsaveBlog } from "../requests";
 
 const BlogPage = () => {
     const cookies = new Cookies();
@@ -153,7 +153,7 @@ const BlogPage = () => {
                                 <BlogTypeLabel label={blog.blogType} variant="overline" />
                             </Box>
                             <Typography color="text.primary" sx={{ whiteSpace: "pre-line" }} variant="h6">
-                                {blog.blogContent}
+                                <LinkifiedText>{blog.blogContent}</LinkifiedText>
                             </Typography>
                         </Box>
                         <EditBlog

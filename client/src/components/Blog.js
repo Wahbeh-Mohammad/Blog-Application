@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Box, Typography, Avatar, Paper, Button, Divider, Menu, MenuItem } from "@mui/material";
-import { BlogTypeLabel, EditBlog, Toast } from "../components";
+import { BlogTypeLabel, EditBlog, LinkifiedText, Toast } from "../components";
 import TodayIcon from "@mui/icons-material/Today";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
+import { fetchDeleteBlog, fetchSaveBlog, fetchSaveCheck, fetchUnsaveBlog } from "../utils/requests";
 import "../styles/components/Blog.css";
-import { fetchDeleteBlog, fetchSaveBlog, fetchSaveCheck, fetchUnsaveBlog } from "../requests";
 
 const Blog = (props) => {
     const { userDetails, blog, idx, onDelete, afterSaveUnsaveOperation } = props;
@@ -146,23 +146,25 @@ const Blog = (props) => {
             <Box className="blog-content">
                 {blogContent.length <= 150 ? (
                     <Typography sx={{ whiteSpace: "pre-line" }} variant="body1">
-                        {blogContent}
+                        <LinkifiedText>{blogContent}</LinkifiedText>
                     </Typography>
                 ) : (
-                    <Typography sx={{ whiteSpace: "pre-line" }}>
-                        {moreContent ? blogContent : blogContent.substr(0, 150)}
-                        <Typography
-                            className="more-content"
-                            component="span"
-                            onClick={() => {
-                                setMoreContent(!moreContent);
-                            }}
-                            color="primary"
-                            variant="text"
-                        >
-                            {moreContent ? "...Show less" : "...Read more"}
+                    <LinkifiedText>
+                        <Typography sx={{ whiteSpace: "pre-line" }}>
+                            {moreContent ? blogContent : blogContent.substr(0, 150)}
+                            <Typography
+                                className="more-content"
+                                component="span"
+                                onClick={() => {
+                                    setMoreContent(!moreContent);
+                                }}
+                                color="primary"
+                                variant="text"
+                            >
+                                {moreContent ? "...Show less" : "...Read more"}
+                            </Typography>
                         </Typography>
-                    </Typography>
+                    </LinkifiedText>
                 )}
             </Box>
             <Divider />

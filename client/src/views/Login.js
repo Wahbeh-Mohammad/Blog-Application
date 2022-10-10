@@ -4,7 +4,7 @@ import Cookies from "universal-cookie";
 import HomeIcon from "@mui/icons-material/Home";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import { verifyTokenRequest, loginRequest } from "../requests";
+import { verifyTokenRequest, loginRequest } from "../utils/requests";
 import { Box, Button, Paper, Typography, Divider, TextField } from "@mui/material";
 import "../styles/Forms.css";
 

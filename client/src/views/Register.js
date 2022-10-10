@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Typography, TextField, Button, Paper, Divider, FormControlLabel, FormControl, Radio, RadioGroup, FormLabel } from "@mui/material";
 import Cookies from "universal-cookie";
-import { verifyTokenRequest, registerRequest } from "../requests";
+import { verifyTokenRequest, registerRequest } from "../utils/requests";
 import HomeIcon from "@mui/icons-material/Home";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";

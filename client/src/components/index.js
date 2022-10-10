@@ -6,3 +6,4 @@ export { default as Layout } from "./layouts/Layout";
 export { default as Comment } from "./Comment";
 export { default as SavedBlog } from "./SavedBlog";
 export { default as Toast } from "./Toast";
+export { default as LinkifiedText } from "./LinkifiedText";

@@ -2,9 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import Cookies from "universal-cookie";
 import { Blog, Toast } from "../components";
 import { Box, Button, Divider, TextField, Typography } from "@mui/material";
+import { fetchFullSavedBlogs, fetchUserBlogs, fetchUserDetails, fetchUpdateUserBio } from "../utils/requests";
 import "../styles/Profile.css";
-import { fetchFullSavedBlogs, fetchUserBlogs, fetchUserDetails } from "../requests";
-import fetchUpdateUserBio from "../requests/user/FetchUpdateUserBio";
 
 const Profile = (props) => {
     const cookies = useMemo(() => new Cookies(), []);

@@ -4,7 +4,7 @@ import { Box, Divider, FormControl, MenuItem, Select, TextField, Typography, But
 import { Toast } from "../components";
 import InfoIcon from "@mui/icons-material/Info";
 import "../styles/CreateBlog.css";
-import { fetchCreateBlog } from "../requests";
+import { fetchCreateBlog } from "../utils/requests";
 
 const CreateBlog = (props) => {
     const cookies = new Cookies();

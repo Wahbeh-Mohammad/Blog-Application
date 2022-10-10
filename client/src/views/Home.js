@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Box, Typography } from "@mui/material";
 import "../styles/Home.css";
 import Cookies from "universal-cookie";
-import { verifyTokenRequest } from "../requests";
+import { verifyTokenRequest } from "../utils/requests";
 
 const Home = (props) => {
     const [loggedIn, setLoggedIn] = useState(false);

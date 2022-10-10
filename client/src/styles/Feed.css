@@ -121,6 +121,10 @@
         overflow: auto;
     }
 
+    .blog-list {
+        padding: 0;
+    }
+
     .more-filter {
         display: block !important;
     }

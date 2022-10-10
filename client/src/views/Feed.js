@@ -6,7 +6,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import "../styles/Feed.css";
-import { fetchAllBlogs, fetchSavedBlogs } from "../requests";
+import { fetchAllBlogs, fetchSavedBlogs } from "../utils/requests";
 
 const Feed = (props) => {
     const cookies = useMemo(() => new Cookies(), []);

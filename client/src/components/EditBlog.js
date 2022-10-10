@@ -16,7 +16,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import "../styles/components/EditBlog.css";
-import { fetchUpdateBlogDetails } from "../requests";
+import { fetchUpdateBlogDetails } from "../utils/requests";
 
 const EditBlog = (props) => {
     const { open, onClose, blog, userDetails, onSuccessfulUpdate } = props;
