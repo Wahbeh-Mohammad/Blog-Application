@@ -41,7 +41,9 @@ const specificBlog = async (req: Request, res: Response) => {
     try {
         const { _id } = req.params;
         if (isValidObjectId(_id)) {
-            const blog = await Blog.findById({ _id }).populate("createdBy", ["_id", "name"]).exec();
+            const blog = await Blog.findById({ _id })
+                .populate("createdBy", ["_id", "name", "biography"])
+                .exec();
             if (blog === null) return res.json({ status: false, error: "Blog not found" });
             else {
                 // Since mongoose has no clauses "NOT A RELATIONAL DB"

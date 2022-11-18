@@ -15,6 +15,8 @@ JWT_EXPIRETIME = 12h
 
 ## Front-End
 
+- [ ] Swap out useState with useRef to cause less renders to happen on the website.
+      https://reactjs.org/docs/hooks-reference.html#useref
 - [ ] Discover Page, Where you can find and follow people.
 - [ ] Add an about author in specific blog page on the left side.
 
